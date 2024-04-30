@@ -43,7 +43,7 @@ INT main(INT argc, LPSTR argv[])
 		FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
-	printf("Got the handle: %d\n", driver_handle);
+	//printf("Got the handle: %d\n", driver_handle);
 	if (INVALID_HANDLE_VALUE == driver_handle)
 	{
 		printf("Driver is not loaded\n");
@@ -51,12 +51,12 @@ INT main(INT argc, LPSTR argv[])
 		return 0;
 	}
 	pid_arg = argv[1];
-	printf("Trying to convert to int the pid\n");
+	//printf("Trying to convert to int the pid\n");
 	std::cin.get();
 	pid = std::atoi(pid_arg);
-	printf("Hiding process with PID: %d\nPress enter to hide the process", pid);
+	//printf("Hiding process with PID: %d\nPress enter to hide the process", pid);
 	std::cin.get();
 	hide_process(driver_handle, pid);
-	printf("Finished hiding the process\n");
+	//printf("Finished hiding the process\n");
 	
 }

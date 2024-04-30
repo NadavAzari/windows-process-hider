@@ -4,7 +4,7 @@
 #define DRIVER_NAME (L"\\Driver\\Hider")
 #define DEVICE_NAME (L"\\Device\\Hider")
 #define SYMBOLIC_LINK (L"\\DosDevices\\Hider")
-#define ACTIVE_PROCESS_LINKS_OFFSET (0x2f0)
+#define ACTIVE_PROCESS_LINKS_OFFSET (0x448)
 
 #define KernelDebugPrint(text) (KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, (text))))
 
