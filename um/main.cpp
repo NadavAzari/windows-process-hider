@@ -36,16 +36,27 @@ INT main(INT argc, LPSTR argv[])
 	LPSTR pid_arg = nullptr;
 	HANDLE driver_handle = CreateFile(
 		L"\\\\.\\Hider",
-		GENERIC_READ,
+		GENERIC_ALL,
 		0,
 		nullptr,
 		OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
-
+	printf("Got the handle: %d\n", driver_handle);
+	if (INVALID_HANDLE_VALUE == driver_handle)
+	{
+		printf("Driver is not loaded\n");
+		std::cin.get();
+		return 0;
+	}
 	pid_arg = argv[1];
+	printf("Trying to convert to int the pid\n");
+	std::cin.get();
 	pid = std::atoi(pid_arg);
+	printf("Hiding process with PID: %d\nPress enter to hide the process", pid);
+	std::cin.get();
 	hide_process(driver_handle, pid);
+	printf("Finished hiding the process\n");
 	
 }
